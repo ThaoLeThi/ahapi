@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mô hình c.g.c – Hai tam giác bằng nhau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f6; --paper:#fbfcfd; --ink:#1b2a41; --muted:#5b6b80; --line:#d5dde7; --grid:#e3e9f0;
+  --t1:#2f5fd0; --t1f:rgba(47,95,208,.10); --t2:#b03a7a; --t2f:rgba(176,58,122,.10);
+  --ok:#1f8a5b; --okf:rgba(31,138,91,.16); --bad:#c43c3c; --badf:rgba(196,60,60,.12);
+  --warn:#9a6a00; --warnf:rgba(154,106,0,.10);
+  --btn:#1b2a41; --btnt:#fbfcfd; --field:#ffffff; --hover:#e6ecf3;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121821; --paper:#18202b; --ink:#e4eaf2; --muted:#9aa8ba; --line:#2b3644; --grid:#1f2935;
+    --t1:#7ea2ff; --t1f:rgba(126,162,255,.14); --t2:#f08cc0; --t2f:rgba(240,140,192,.14);
+    --ok:#4fd39a; --okf:rgba(79,211,154,.16); --bad:#ff7d7d; --badf:rgba(255,125,125,.13);
+    --warn:#f2c14e; --warnf:rgba(242,193,78,.12);
+    --btn:#e4eaf2; --btnt:#121821; --field:#121821; --hover:#223042;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121821; --paper:#18202b; --ink:#e4eaf2; --muted:#9aa8ba; --line:#2b3644; --grid:#1f2935;
+  --t1:#7ea2ff; --t1f:rgba(126,162,255,.14); --t2:#f08cc0; --t2f:rgba(240,140,192,.14);
+  --ok:#4fd39a; --okf:rgba(79,211,154,.16); --bad:#ff7d7d; --badf:rgba(255,125,125,.13);
+  --warn:#f2c14e; --warnf:rgba(242,193,78,.12);
+  --btn:#e4eaf2; --btnt:#121821; --field:#121821; --hover:#223042;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 18px 32px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+header.top h1{margin:0;font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-.01em}
+header.top h1 .m{font-family:"STIX Two Text","Times New Roman",serif;font-weight:500}
+header.top p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.preset{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+select,input{font:inherit;color:var(--ink);background:var(--field);border:1.5px solid var(--line);border-radius:8px}
+select{padding:7px 10px;max-width:100%}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.panel h2,.card h2{margin:0;font-size:16px;font-weight:700}
+.tri-card{border-left:4px solid var(--t1);padding:4px 0 6px 12px;margin-top:14px}
+.tri-card.c2{border-left-color:var(--t2)}
+.tri-title{font-weight:700;color:var(--t1);margin-bottom:6px}
+.c2 .tri-title{color:var(--t2)}
+.lab{font-size:13px;color:var(--muted);margin:8px 0 4px}
+.row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.sym{font-family:"STIX Two Text","Times New Roman",serif;font-size:20px;width:20px;text-align:center}
+.eqs{width:12px;text-align:center;color:var(--muted)}
+.unit{color:var(--muted);font-size:14px}
+input{padding:6px 8px;outline:none}
+input:focus,select:focus{border-color:var(--t1);box-shadow:0 0 0 3px var(--t1f)}
+input.name{width:110px;font-family:"STIX Two Text","Times New Roman",serif;font-style:italic;font-size:17px}
+input.lbl{width:76px;font-family:"STIX Two Text","Times New Roman",serif;font-style:italic;font-size:17px}
+input.num{width:76px;text-align:right}
+.info{font-size:13px;color:var(--muted);margin-top:4px}
+.amb{font-size:13px;background:var(--warnf);color:var(--ink);border-radius:8px;padding:8px 10px;margin-top:6px}
+.amb label{display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:3px}
+.opt{margin-top:14px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:9px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 14px;font-weight:600}
+button:hover{background:var(--hover)}
+button:focus-visible{outline:3px solid var(--t1);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--btn);color:var(--btnt);border-color:var(--btn)}
+button.primary:hover{opacity:.9;background:var(--btn)}
+.seg button[aria-pressed="true"]{border-color:var(--t1);color:var(--t1);background:var(--t1f)}
+#bDraw{width:100%;margin-top:16px;padding:11px}
+.err{color:var(--bad);font-size:13.5px;margin-top:10px}
+.stage{display:grid;gap:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.legend{display:flex;align-items:center;gap:6px;font-family:"STIX Two Text","Times New Roman",serif;font-size:16px}
+.legend i{display:inline-block;width:14px;height:4px;border-radius:2px}
+.legend i.t1{background:var(--t1)} .legend i.t2{background:var(--t2);margin-left:8px}
+.tag{font-size:13px;padding:3px 10px;border-radius:999px;background:var(--hover);color:var(--muted)}
+svg.canvas{display:block;width:100%;border:1px solid var(--line);border-radius:10px;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+#svgTop{height:300px} #svgWork{height:330px}
+@media (max-width:600px){#svgTop{height:250px}#svgWork{height:280px}}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns button{flex:1 1 120px}
+.note{font-size:13.5px;color:var(--muted);margin:10px 0 0;min-height:1.5em}
+.warnbox{font-size:13.5px;color:var(--ink);background:var(--warnf);border-radius:8px;padding:8px 10px;margin-top:10px}
+.tri{stroke-width:2.4;stroke-linejoin:round}
+.tri.t1{stroke:var(--t1);fill:var(--t1f)} .tri.t2{stroke:var(--t2);fill:var(--t2f)}
+.tri.dash{stroke-dasharray:7 5}
+svg.ok .tri{fill:var(--okf)} svg.bad .tri.t2{fill:var(--badf)}
+.mk{fill:none;stroke-width:2.2;stroke-linecap:round}
+.mk.t1{stroke:var(--t1)} .mk.t2{stroke:var(--t2)}
+.arc0{fill:none;stroke-width:1.2;stroke:var(--muted)}
+.vl{font-family:"STIX Two Text","Times New Roman",serif;font-style:italic;font-weight:500;font-size:19px;fill:var(--ink)}
+.vl .t1{fill:var(--t1)} .vl .t2{fill:var(--t2)} .vl .eqv{fill:var(--muted);font-style:normal}
+.val{font-size:12.5px;fill:var(--muted)}
+.banner rect{rx:8px}
+.banner.ok rect{fill:var(--ok)} .banner.bad rect{fill:var(--bad)}
+.banner text{fill:#fff;font-weight:700;font-size:14px}
+.result{font-size:15px}
+.badge{display:inline-block;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:10px}
+.badge.ok{background:var(--okf);color:var(--ok)} .badge.bad{background:var(--badf);color:var(--bad)} .badge.warn{background:var(--warnf);color:var(--warn)}
+.result table{border-collapse:collapse;width:100%;margin:6px 0 12px;font-size:14px}
+.result th,.result td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.result th{background:var(--hover);font-weight:600}
+.tbl{overflow-x:auto}
+.proof{border-left:3px solid var(--ink);padding:4px 0 4px 12px;margin:8px 0}
+.proof div{margin:2px 0}
+.m{font-family:"STIX Two Text","Times New Roman",serif}
+.mi{font-family:"STIX Two Text","Times New Roman",serif;font-style:italic}
+.wh{position:relative;display:inline-block;font-family:"STIX Two Text","Times New Roman",serif;font-style:italic;padding-top:.18em}
+.wh::before{content:"";position:absolute;left:6%;right:6%;top:.02em;height:.42em;border-top:1.4px solid currentColor;border-radius:50% 50% 0 0/100% 100% 0 0}
+.hint{color:var(--muted)}
+ul.why{margin:6px 0 0;padding-left:20px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Hai tam giác bằng nhau <span class="m">(c.g.c)</span></h1>
+      <p>Toán 7 · Nhập dữ kiện, vẽ hình, tách – xoay – xếp chồng để kiểm tra sự chồng khít.</p>
+    </div>
+    <label class="preset">Ví dụ mẫu
+      <select id="preset" aria-label="Chọn ví dụ mẫu">
+        <option value="0">Hai tam giác rời nhau</option>
+        <option value="1">Có cạnh chung</option>
+        <option value="2">Hai góc đối đỉnh</option>
+        <option value="3">Có góc chung</option>
+        <option value="4">Không bằng nhau</option>
+        <option value="5">Góc không xen giữa (phản ví dụ)</option>
+      </select>
+    </label>
+  </header>
+
+  <div class="layout">
+    <aside class="panel">
+      <h2>Nhập liệu</h2>
+
+      <div class="tri-card c1">
+        <div class="tri-title">Tam giác 1</div>
+        <div class="row"><span class="sym">Δ</span><input id="n1" class="name" autocomplete="off" spellcheck="false" aria-label="Tên tam giác 1"></div>
+        <div class="lab">Cạnh</div>
+        <div class="row"><input id="sa1" class="lbl" autocomplete="off" spellcheck="false" aria-label="Tên cạnh thứ nhất của tam giác 1"><span class="eqs">=</span><input id="va1" class="num" inputmode="decimal" aria-label="Độ dài cạnh thứ nhất"><span class="unit">cm</span></div>
+        <div class="row"><input id="sb1" class="lbl" autocomplete="off" spellcheck="false" aria-label="Tên cạnh thứ hai của tam giác 1"><span class="eqs">=</span><input id="vb1" class="num" inputmode="decimal" aria-label="Độ dài cạnh thứ hai"><span class="unit">cm</span></div>
+        <div class="lab">Góc</div>
+        <div class="row"><span class="sym">∠</span><input id="ga1" class="lbl" autocomplete="off" spellcheck="false" aria-label="Tên góc của tam giác 1"><span class="eqs">=</span><input id="gv1" class="num" inputmode="decimal" aria-label="Số đo góc"><span class="unit">°</span></div>
+        <div class="amb" id="amb1" hidden></div>
+        <div class="info" id="info1"></div>
+      </div>
+
+      <div class="tri-card c2">
+        <div class="tri-title">Tam giác 2</div>
+        <div class="row"><span class="sym">Δ</span><input id="n2" class="name" autocomplete="off" spellcheck="false" aria-label="Tên tam giác 2"></div>
+        <div class="lab">Cạnh</div>
+        <div class="row"><input id="sa2" class="lbl" autocomplete="off" spellcheck="false" aria-label="Tên cạnh thứ nhất của tam giác 2"><span class="eqs">=</span><input id="va2" class="num" inputmode="decimal" aria-label="Độ dài cạnh thứ nhất"><span class="unit">cm</span></div>
+        <div class="row"><input id="sb2" class="lbl" autocomplete="off" spellcheck="false" aria-label="Tên cạnh thứ hai của tam giác 2"><span class="eqs">=</span><input id="vb2" class="num" inputmode="decimal" aria-label="Độ dài cạnh thứ hai"><span class="unit">cm</span></div>
+        <div class="lab">Góc</div>
+        <div class="row"><span class="sym">∠</span><input id="ga2" class="lbl" autocomplete="off" spellcheck="false" aria-label="Tên góc của tam giác 2"><span class="eqs">=</span><input id="gv2" class="num" inputmode="decimal" aria-label="Số đo góc"><span class="unit">°</span></div>
+        <div class="amb" id="amb2" hidden></div>
+        <div class="info" id="info2"></div>
+      </div>
+
+      <div class="opt" id="sharedOpt" hidden>
+        <div class="lab">Hai tam giác có 1 đỉnh chung, vẽ theo kiểu:</div>
+        <div class="seg">
+          <button type="button" data-mode="doi" aria-pressed="true">Hai góc đối đỉnh</button>
+          <button type="button" data-mode="chung" aria-pressed="false">Góc chung</button>
+        </div>
+      </div>
+
+      <button id="bDraw" class="primary" type="button">Vẽ hình</button>
+      <div class="err" id="err"></div>
+      <p class="info" style="margin-top:12px">Gõ tên cạnh như <span class="mi">AB</span>; góc gõ 1 đỉnh (<span class="mi">A</span>) hoặc 3 đỉnh (<span class="mi">BAC</span>). Dùng dấu ' cho tên như <span class="mi">A′B′C′</span>.</p>
+    </aside>
+
+    <section class="stage">
+      <div class="card">
+        <div class="card-h"><h2>Hình ban đầu</h2><span class="legend"><i class="t1"></i><span id="lg1"></span><i class="t2"></i><span id="lg2"></span></span></div>
+        <svg id="svgTop" class="canvas" role="img" aria-label="Hình vẽ ban đầu của hai tam giác"></svg>
+        <div id="warn" class="warnbox" hidden></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>Khu thao tác</h2><span id="tag" class="tag">Hình ban đầu</span></div>
+        <svg id="svgWork" class="canvas" role="img" aria-label="Khu thao tác tách, xoay, xếp chồng"></svg>
+        <div class="btns">
+          <button id="bSep" type="button">Tách hình</button>
+          <button id="bRot" type="button">Xoay hình</button>
+          <button id="bStack" type="button">Xếp chồng</button>
+          <button id="bReset" type="button">Làm mới</button>
+        </div>
+        <p id="note" class="note"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>Kiểm tra hai tam giác bằng nhau</h2><button id="bCheck" class="primary" type="button">Kiểm tra</button></div>
+        <div id="result" class="result"><span class="hint">Nhấn “Kiểm tra” để xem kết luận và lời giải theo trường hợp c.g.c.</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ---------- tiện ích hình học ---------- */
+const $=id=>document.getElementById(id);
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1]], add=(a,b)=>[a[0]+b[0],a[1]+b[1]], mul=(a,k)=>[a[0]*k,a[1]*k];
+const cross=(a,b)=>a[0]*b[1]-a[1]*b[0], dot=(a,b)=>a[0]*b[0]+a[1]*b[1], len=a=>Math.hypot(a[0],a[1]);
+const unit=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l]};
+const rot=(p,t)=>[p[0]*Math.cos(t)-p[1]*Math.sin(t),p[0]*Math.sin(t)+p[1]*Math.cos(t)];
+const refl=(p,s)=>[p[0],p[1]*s];
+const ang=a=>Math.atan2(a[1],a[0]);
+const normA=t=>{while(t>Math.PI)t-=2*Math.PI;while(t<=-Math.PI)t+=2*Math.PI;return t};
+const sgn=x=>x<0?-1:1;
+const eq=(a,b)=>Math.abs(a-b)<=1e-6+1e-4*Math.max(Math.abs(a),Math.abs(b));
+const fmt=x=>String(Math.round(x*100)/100).replace('.',',');
+const disp=s=>s.replace(/'/g,'′');
+const hat=s=>`<span class="wh">${disp(s)}</span>`;
+const mi=s=>`<span class="mi">${disp(s)}</span>`;
+const centroid=(P,names)=>{let x=0,y=0;names.forEach(n=>{x+=P[n][0];y+=P[n][1]});return [x/3,y/3]};
+const bbox=pts=>{let b={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity};pts.forEach(p=>{b.minX=Math.min(b.minX,p[0]);b.maxX=Math.max(b.maxX,p[0]);b.minY=Math.min(b.minY,p[1]);b.maxY=Math.max(b.maxY,p[1])});return b};
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function tokens(raw){
+  let s=(raw||'').toUpperCase().replace(/[\u0394\u2206\u2220\s]/g,'').replace(/[’‘`´′]/g,"'");
+  if(!s) return null;
+  const m=s.match(/[A-Z]'*/g);
+  if(!m||m.join('')!==s) return null;
+  return m;
+}
+function num(s){s=(s||'').trim().replace(',','.');return /^\d+(\.\d+)?$/.test(s)?parseFloat(s):NaN}
+const other=(s,x)=>s.a===x?s.b:s.a;
+const nbr=(T,x)=>T.nm.filter(y=>y!==x);
+
+/* ---------- đọc & giải tam giác ---------- */
+const st={sol:{1:0,2:0},mode:'doi',busy:false,stage:'init'};
+
+function readTri(k){
+  const v=id=>$(id+k).value.trim();
+  const E=m=>({err:`Tam giác ${k}: ${m}`});
+  const nm=tokens(v('n'));
+  if(!nm||nm.length!==3||new Set(nm).size!==3) return E('tên tam giác phải gồm 3 đỉnh khác nhau (VD: ABC, MNP, A′B′C′).');
+  const N=disp(nm.join(''));
+  const sides=[];
+  for(const [sl,sv] of [['sa','va'],['sb','vb']]){
+    const raw=v(sl), t=tokens(raw), val=num(v(sv));
+    if(!t||t.length!==2||t[0]===t[1]||!nm.includes(t[0])||!nm.includes(t[1])) return E(`cạnh “${raw||'…'}” phải gồm 2 đỉnh của Δ${N}.`);
+    if(!(val>0)) return E(`độ dài cạnh ${disp(t.join(''))} phải là số dương.`);
+    sides.push({a:t[0],b:t[1],v:val});
+  }
+  const key=s=>[s.a,s.b].sort().join('|');
+  if(key(sides[0])===key(sides[1])) return E('hai cạnh đã nhập phải là hai cạnh khác nhau.');
+  const gr=v('ga'), gt=tokens(gr), gv=num(v('gv'));
+  let V=null;
+  if(gt&&gt.length===1&&nm.includes(gt[0])) V=gt[0];
+  else if(gt&&gt.length===3&&new Set(gt).size===3&&gt.every(x=>nm.includes(x))) V=gt[1];
+  if(!V) return E(`góc “${gr||'…'}” không hợp lệ (gõ 1 đỉnh như A hoặc 3 đỉnh như BAC).`);
+  if(!(gv>0&&gv<180)) return E('số đo góc phải lớn hơn 0° và nhỏ hơn 180°.');
+
+  const al=gv*Math.PI/180, c=Math.cos(al), sn=Math.sin(al);
+  const inc=sides.every(s=>s.a===V||s.b===V);
+  let p={}, cands=null, solIdx=0, unknownName=null;
+  if(inc){
+    const P=other(sides[0],V), Q=other(sides[1],V);
+    p[V]=[0,0]; p[P]=[sides[0].v,0]; p[Q]=[sides[1].v*c,sides[1].v*sn];
+  }else{
+    const adj=sides.find(s=>s.a===V||s.b===V), opp=sides.find(s=>s!==adj);
+    const W=other(adj,V), U=nm.find(x=>x!==V&&x!==W);
+    const cc=adj.v, a=opp.v, D=a*a-cc*cc*sn*sn;
+    cands=[];
+    if(D>=-1e-9){const d=Math.sqrt(Math.max(D,0));for(const x of [cc*c+d,cc*c-d]) if(x>1e-9&&!cands.some(y=>eq(x,y))) cands.push(x);}
+    if(!cands.length) return E(`không tồn tại tam giác với số liệu này (cạnh ${disp(opp.a+opp.b)} quá ngắn so với góc ${disp(V)}).`);
+    solIdx=Math.min(st.sol[k]||0,cands.length-1);
+    const x=cands[solIdx];
+    p[V]=[0,0]; p[W]=[cc,0]; p[U]=[x*c,x*sn]; unknownName=V+U;
+  }
+  // chuẩn hóa: cạnh (đỉnh 2 – đỉnh 3) nằm ngang, đỉnh 1 ở trên
+  const [A0,B0,C0]=nm, o=p[B0].slice(), th=-ang(sub(p[C0],o));
+  for(const x of nm) p[x]=rot(sub(p[x],o),th);
+  if(p[A0][1]<0) for(const x of nm) p[x]=[p[x][0],-p[x][1]];
+  const T={k,nm,sides,V,gv,inc,cands,solIdx,unknownName,p};
+  T.L=(x,y)=>len(sub(T.p[x],T.p[y]));
+  T.angAt=x=>{const [u,w]=nbr(T,x);const a=sub(T.p[u],T.p[x]),b=sub(T.p[w],T.p[x]);return Math.acos(Math.max(-1,Math.min(1,dot(a,b)/(len(a)*len(b)))))*180/Math.PI};
+  T.angName=()=>{if(T.inc) return other(T.sides[0],T.V)+T.V+other(T.sides[1],T.V);const n=nbr(T,T.V);return n[0]+T.V+n[1]};
+  return T;
+}
+
+/* ---------- tương ứng đỉnh ---------- */
+function dataCorr(T1,T2){
+  const v1=T1.V,v2=T2.V;
+  const n1=T1.inc?[other(T1.sides[0],v1),other(T1.sides[1],v1)]:nbr(T1,v1);
+  const n2=T2.inc?[other(T2.sides[0],v2),other(T2.sides[1],v2)]:nbr(T2,v2);
+  const s=Math.abs(T2.L(v2,n2[0])-T1.L(v1,n1[0]))+Math.abs(T2.L(v2,n2[1])-T1.L(v1,n1[1]));
+  const x=Math.abs(T2.L(v2,n2[1])-T1.L(v1,n1[0]))+Math.abs(T2.L(v2,n2[0])-T1.L(v1,n1[1]));
+  return s<=x+1e-9?{[v2]:v1,[n2[0]]:n1[0],[n2[1]]:n1[1]}:{[v2]:v1,[n2[1]]:n1[0],[n2[0]]:n1[1]};
+}
+function congCorr(T1,T2,pref){
+  const a=T1.nm, idx=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+  let list=idx.map(q=>q.map(i=>T2.nm[i]));
+  const pb=a.map(x=>Object.keys(pref).find(b=>pref[b]===x)).join('|');
+  list.sort((u,w)=>(w.join('|')===pb)-(u.join('|')===pb));
+  for(const b of list){
+    if(eq(T1.L(a[0],a[1]),T2.L(b[0],b[1]))&&eq(T1.L(a[1],a[2]),T2.L(b[1],b[2]))&&eq(T1.L(a[0],a[2]),T2.L(b[0],b[2])))
+      return {[b[0]]:a[0],[b[1]]:a[1],[b[2]]:a[2]};
+  }
+  return null;
+}
+const invert=m=>{const r={};for(const k in m) r[m[k]]=k;return r};
+
+/* ---------- phép dời hình ---------- */
+function rigid(a0,a1,b0,b1,s){
+  const th=normA(ang(sub(b1,b0))-ang(refl(sub(a1,a0),s)));
+  const t=sub(b0,rot(refl(a0,s),th));
+  return {th,s,f:q=>add(rot(refl(q,s),th),t)};
+}
+function mapTri(P2,P1,corr,T2){
+  const x0=T2.V,[x1,x2]=nbr(T2,x0);
+  const o2=sgn(cross(sub(P2[x1],P2[x0]),sub(P2[x2],P2[x0])));
+  const o1=sgn(cross(sub(P1[corr[x1]],P1[corr[x0]]),sub(P1[corr[x2]],P1[corr[x0]])));
+  return rigid(P2[x0],P2[x1],P1[corr[x0]],P1[corr[x1]],o1*o2);
+}
+
+/* ---------- hình ban đầu (ghép theo đỉnh/cạnh chung) ---------- */
+function buildComposite(T1,T2,mode,corr){
+  const P1={...T1.p}, P2={}, shared=T2.nm.filter(x=>T1.nm.includes(x));
+  let warn='', layout='rời';
+  const apply=f=>{for(const x of T2.nm) P2[x]=f(T2.p[x])};
+  const sideBy=()=>{
+    const b1=bbox(Object.values(P1)), b2=bbox(Object.values(T2.p));
+    const gap=0.45*Math.max(b1.maxX-b1.minX,b2.maxX-b2.minX,1);
+    const d=[b1.maxX+gap-b2.minX,b1.minY-b2.minY];
+    apply(q=>add(q,d));
+  };
+  if(shared.length===3) return {err:'Hai tam giác trùng cả 3 tên đỉnh. Hãy đặt tên tam giác 2 khác (VD: DEF hoặc A′B′C′).'};
+  if(shared.length===2){
+    const [X,Y]=shared;
+    if(!eq(T1.L(X,Y),T2.L(X,Y))){
+      warn=`Cạnh chung ${mi(X+Y)} có độ dài khác nhau ở hai tam giác (${fmt(T1.L(X,Y))} cm và ${fmt(T2.L(X,Y))} cm) nên dữ kiện mâu thuẫn; hình được vẽ tách rời.`;
+      sideBy();
+    }else{
+      const Z1=T1.nm.find(z=>z!==X&&z!==Y), Z2=T2.nm.find(z=>z!==X&&z!==Y), d=sub(P1[Y],P1[X]);
+      for(const s of [1,-1]){
+        const r=rigid(T2.p[X],T2.p[Y],P1[X],P1[Y],s);
+        if(s===-1||sgn(cross(d,sub(r.f(T2.p[Z2]),P1[X])))!==sgn(cross(d,sub(P1[Z1],P1[X])))){apply(r.f);break}
+      }
+      P2[X]=P1[X].slice(); P2[Y]=P1[Y].slice(); layout='cạnh chung';
+    }
+  }else if(shared.length===1){
+    const O=shared[0], [n1a,n1b]=nbr(T1,O), [xa,xb]=nbr(T2,O);
+    let X=xa,Yo=xb; if(corr[xb]===n1a||corr[xa]===n1b){X=xb;Yo=xa}
+    const w1=unit(sub(P1[n1a],P1[O])), w2=unit(sub(P1[n1b],P1[O])), o1=sgn(cross(w1,w2));
+    const ux=sub(T2.p[X],T2.p[O]), uy=sub(T2.p[Yo],T2.p[O]), o2=sgn(cross(ux,uy));
+    let target,req;
+    if(mode==='doi'){target=mul(w1,-1);req=o1}else{target=w2;req=-o1}
+    const s=req*o2, th=ang(target)-ang(refl(ux,s));
+    apply(q=>add(rot(refl(sub(q,T2.p[O]),s),th),P1[O]));
+    P2[O]=P1[O].slice(); layout=mode==='doi'?'đối đỉnh':'góc chung';
+  }else sideBy();
+  return {P1,P2,shared,warn,layout};
+}
+
+/* ---------- khu thao tác: các trạng thái ---------- */
+function buildWork(C,T1,T2,corr){
+  const c1=centroid(C.P1,T1.nm), c2=centroid(C.P2,T2.nm);
+  const R1=Math.max(...T1.nm.map(n=>len(sub(C.P1[n],c1)))), R2=Math.max(...T2.nm.map(n=>len(sub(C.P2[n],c2))));
+  const b=bbox([...Object.values(C.P1),...Object.values(C.P2)]), mid=[(b.minX+b.maxX)/2,(b.minY+b.maxY)/2];
+  const gap=Math.max(R1,R2)*0.55, total=2*R1+gap+2*R2, L=mid[0]-total/2;
+  const slot1=[L+R1,mid[1]], slot2=[L+2*R1+gap+R2,mid[1]];
+  const M=mapTri(C.P2,C.P1,corr,T2);
+  const A0={th:0,s:1,c:c1}, A1={th:0,s:1,c:slot1};
+  const states={
+    init:{a:A0,b:{th:0,s:1,c:c2}},
+    sep:{a:A1,b:{th:0,s:1,c:slot2}},
+    rot:{a:A1,b:{th:M.th,s:M.s,c:slot2}},
+    stack:{a:A1,b:{th:M.th,s:M.s,c:add(M.f(c2),sub(slot1,c1))}}
+  };
+  const pts=[];
+  for(const k in states){const S=states[k];
+    [[S.a.c,R1],[S.b.c,R2]].forEach(([c,R])=>{pts.push([c[0]-R,c[1]-R],[c[0]+R,c[1]+R])});
+  }
+  pts.push(...Object.values(C.P1),...Object.values(C.P2));
+  return {states,c1,c2,M,bb:bbox(pts)};
+}
+function place(P,cOrig,s,names){
+  const r={};names.forEach(n=>{r[n]=add(rot(refl(sub(P[n],cOrig),s.s),s.th),s.c)});return r;
+}
+
+/* ---------- ký hiệu bằng nhau ---------- */
+function computeMarks(T1,T2){
+  const sides=[];[T1,T2].forEach(T=>T.sides.forEach(s=>sides.push({t:T.k,a:s.a,b:s.b,v:s.v})));
+  const groups=[];
+  for(const s of sides){let g=groups.find(g=>eq(g.v,s.v));if(!g){g={v:s.v,m:[]};groups.push(g)}g.m.push(s)}
+  let cnt=0;const sm=[];
+  for(const g of groups){if(g.m.length<2) continue;cnt++;g.m.forEach(s=>sm.push({...s,count:cnt,g:cnt}))}
+  const same=eq(T1.gv,T2.gv);
+  const am=[T1,T2].map(T=>{const n=T.angName();return {t:T.k,v:T.V,n1:n.replace(T.V,'').length?null:null,names:n,val:T.gv,count:same?1:0}});
+  am.forEach((m,i)=>{const T=i?T2:T1;const nb=T.inc?[other(T.sides[0],T.V),other(T.sides[1],T.V)]:nbr(T,T.V);m.n1=nb[0];m.n2=nb[1]});
+  return {sides:sm,angs:am,vals:sides};
+}
+
+/* ---------- vẽ SVG ---------- */
+function mkMap(bb,W,H,pad){
+  const w=Math.max(bb.maxX-bb.minX,1e-6), h=Math.max(bb.maxY-bb.minY,1e-6);
+  const k=Math.min((W-2*pad)/w,(H-2*pad)/h), ox=(W-k*w)/2, oy=(H-k*h)/2;
+  return p=>[ox+(p[0]-bb.minX)*k, oy+(bb.maxY-p[1])*k];
+}
+const f1=v=>v.toFixed(1);
+function scene(svg,o){
+  const W=svg.clientWidth||720, H=svg.clientHeight||300;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('class','canvas '+(o.state||''));
+  const S=mkMap(o.bb,W,H,o.pad||40), SP={};
+  o.tris.forEach(t=>{SP[t.k]={};t.names.forEach(n=>SP[t.k][n]=S(t.P[n]));SP[t.k].__c=centroid(SP[t.k],t.names)});
+  let h='';
+  o.tris.forEach(t=>{h+=`<polygon class="tri ${t.cls}${t.dash?' dash':''}" points="${t.names.map(n=>SP[t.k][n].map(f1).join(',')).join(' ')}"/>`});
+  const pk=p=>p.map(v=>Math.round(v)).join(',');
+  const segKey=(A,B)=>[pk(A),pk(B)].sort().join('|');
+  // vạch trên cạnh
+  const gkeys={};
+  o.sideMarks.forEach(m=>{(gkeys[m.g]=gkeys[m.g]||new Set()).add(segKey(SP[m.t][m.a],SP[m.t][m.b]))});
+  const seen=new Set();
+  for(const m of o.sideMarks){
+    const A=SP[m.t][m.a],B=SP[m.t][m.b],key=segKey(A,B);
+    if(o.dedupe){if(seen.has(key)||gkeys[m.g].size===1) continue;seen.add(key)}
+    const Mp=mul(add(A,B),.5), d=unit(sub(B,A)), n=[-d[1],d[0]];
+    for(let i=0;i<m.count;i++){const c=add(Mp,mul(d,(i-(m.count-1)/2)*6)), p1=add(c,mul(n,7)), p2=sub(c,mul(n,7));
+      h+=`<line class="mk t${m.t}" x1="${f1(p1[0])}" y1="${f1(p1[1])}" x2="${f1(p2[0])}" y2="${f1(p2[1])}"/>`}
+  }
+  // giá trị cạnh
+  if(o.values){
+    const sv=new Set();
+    for(const s of o.vals){
+      const A=SP[s.t][s.a],B=SP[s.t][s.b],key=segKey(A,B); if(sv.has(key)) continue; sv.add(key);
+      const Mp=mul(add(A,B),.5), d=unit(sub(B,A)); let n=[-d[1],d[0]];
+      if(dot(n,sub(Mp,SP[s.t].__c))<0) n=mul(n,-1);
+      const p=add(Mp,mul(n,21));
+      h+=`<text class="val" x="${f1(p[0])}" y="${f1(p[1])}" text-anchor="middle" dominant-baseline="central">${fmt(s.v)} cm</text>`;
+    }
+  }
+  // cung góc
+  const sa=new Set();
+  for(const m of o.angMarks){
+    const O=SP[m.t][m.v],A=SP[m.t][m.n1],B=SP[m.t][m.n2];
+    const a1=ang(sub(A,O)), d=normA(ang(sub(B,O))-a1);
+    const key=pk(O)+'|'+[Math.round(a1*20),Math.round((a1+d)*20)].sort().join(',');
+    if(o.dedupe){if(sa.has(key)) continue;sa.add(key)}
+    const base=Math.max(12,Math.min(24,.3*Math.min(len(sub(A,O)),len(sub(B,O)))));
+    const n=Math.max(1,m.count);
+    for(let i=0;i<n;i++){
+      const r=base+i*4.5;let path='';
+      for(let j=0;j<=24;j++){const t=a1+d*j/24;path+=(j?'L':'M')+f1(O[0]+r*Math.cos(t))+' '+f1(O[1]+r*Math.sin(t))}
+      h+=`<path class="${m.count?'mk t'+m.t:'arc0'}" d="${path}"/>`;
+    }
+    if(o.values){const b=a1+d/2, r=base+n*4.5+15, p=[O[0]+r*Math.cos(b),O[1]+r*Math.sin(b)];
+      h+=`<text class="val" x="${f1(p[0])}" y="${f1(p[1])}" text-anchor="middle" dominant-baseline="central">${fmt(m.val)}°</text>`}
+  }
+  // tên đỉnh
+  const labs=[];
+  o.tris.forEach(t=>t.names.forEach(n=>{
+    const p=SP[t.k][n], dir=unit(sub(p,SP[t.k].__c));
+    let g=labs.find(L=>len(sub(L.p,p))<3);
+    if(g){g.dir=add(g.dir,dir);g.tris.add(t.k);if(!g.items.some(it=>it.n===n)) g.items.push({n,cls:t.cls})}
+    else labs.push({p,dir,tris:new Set([t.k]),items:[{n,cls:t.cls}]});
+  }));
+  for(const L of labs){
+    let d=len(L.dir)<.2?[0,-1]:unit(L.dir);
+    const multi=L.items.length>1, off=multi?24:15, p=add(L.p,mul(d,off));
+    const inner=L.items.map((it,i)=>(i?'<tspan class="eqv">≡</tspan>':'')+`<tspan class="${L.tris.size>1&&!multi?'':it.cls}">${disp(it.n)}</tspan>`).join('');
+    h+=`<text class="vl" x="${f1(p[0])}" y="${f1(p[1])}" text-anchor="middle" dominant-baseline="central">${inner}</text>`;
+  }
+  if(o.banner){
+    const w=o.banner.text.length*8+30, x=(W-w)/2;
+    h+=`<g class="banner ${o.banner.cls}"><rect x="${f1(x)}" y="${H-40}" width="${w}" height="30" rx="8"/><text x="${f1(W/2)}" y="${H-25}" text-anchor="middle" dominant-baseline="central">${o.banner.text}</text></g>`;
+  }
+  svg.innerHTML=h;
+}
+
+function renderTop(){
+  const {T1,T2,C,marks}=st;
+  scene($('svgTop'),{bb:bbox([...Object.values(C.P1),...Object.values(C.P2)]),
+    tris:[{k:1,names:T1.nm,P:C.P1,cls:'t1'},{k:2,names:T2.nm,P:C.P2,cls:'t2'}],
+    sideMarks:marks.sides,angMarks:marks.angs,vals:marks.vals,values:true,dedupe:true,pad:44});
+}
+function renderWork(){
+  const {T1,T2,C,W,cur,marks}=st;
+  const P1=place(C.P1,W.c1,cur.a,T1.nm), P2=place(C.P2,W.c2,cur.b,T2.nm);
+  let banner=null,state='';
+  const stacked=st.stage==='stack'&&!st.busy;
+  if(stacked){state=st.cong?'ok':'bad';banner={cls:state,text:st.cong?'✓ Hai tam giác chồng khít':'✗ Hai tam giác không chồng khít'}}
+  scene($('svgWork'),{bb:W.bb,tris:[{k:1,names:T1.nm,P:P1,cls:'t1'},{k:2,names:T2.nm,P:P2,cls:'t2',dash:stacked}],
+    sideMarks:marks.sides,angMarks:marks.angs,vals:marks.vals,values:false,dedupe:false,banner,state,pad:50});
+}
+
+/* ---------- hoạt ảnh ---------- */
+const lerpS=(a,b,t)=>({th:a.th+(b.th-a.th)*t,s:a.s+(b.s-a.s)*t,c:[a.c[0]+(b.c[0]-a.c[0])*t,a.c[1]+(b.c[1]-a.c[1])*t]});
+function animate(stage,dur){
+  return new Promise(res=>{
+    const from={a:{...st.cur.a},b:{...st.cur.b}}, to=st.W.states[stage], t0=performance.now();
+    if(reduceMotion) dur=1;
+    const step=now=>{
+      const t=Math.min(1,(now-t0)/dur), e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      st.cur={a:lerpS(from.a,to.a,e),b:lerpS(from.b,to.b,e)};
+      if(t>=1){st.stage=stage;st.busy=false}
+      renderWork();
+      if(t<1) requestAnimationFrame(step); else res();
+    };
+    st.busy=true; requestAnimationFrame(step);
+  });
+}
+const ORDER=['init','sep','rot','stack'];
+function setBusy(b){['bSep','bRot','bStack','bReset','bDraw'].forEach(id=>$(id).disabled=b)}
+async function go(target){
+  if(st.busy||!st.W) return;
+  setBusy(true);
+  const ci=ORDER.indexOf(st.stage), ti=ORDER.indexOf(target);
+  if(ti<ci) await animate(target,750);
+  else for(let i=ci+1;i<=ti;i++) await animate(ORDER[i],ORDER[i]==='rot'?1100:850);
+  setBusy(false); updateTag();
+}
+function corrText(){const inv=invert(st.corr);return st.T1.nm.map(x=>`${mi(x)}↔${mi(inv[x])}`).join(', ')}
+function updateTag(){
+  const M=st.W.M, lt={init:'Hình ban đầu',sep:'Đã tách hình',rot:'Đã xoay hình',stack:'Đã xếp chồng'};
+  $('tag').textContent=lt[st.stage];
+  let n='';
+  if(st.stage==='init') n='Bấm “Tách hình” để tách hai tam giác (kể cả khi có cạnh chung, đỉnh chung).';
+  if(st.stage==='sep') n='Hai tam giác đã được tách rời, giữ nguyên hình dạng và kích thước.';
+  if(st.stage==='rot'){
+    const deg=Math.round(Math.abs(M.th)*180/Math.PI);
+    n=`Tam giác 2 được ${M.s<0?'lật rồi ':''}xoay ${deg}° ${M.th>=0?'ngược':'cùng'} chiều kim đồng hồ để các đỉnh tương ứng cùng hướng: ${corrText()}.`;
+  }
+  if(st.stage==='stack') n=st.cong?`Các đỉnh trùng nhau: ${corrText()}. Hai tam giác chồng khít.`:'Đặt đỉnh của góc và một cạnh trùng nhau nhưng phần còn lại lệch ra, nên hai tam giác không chồng khít.';
+  $('note').innerHTML=n;
+}
+
+/* ---------- vẽ hình ---------- */
+function renderAmb(k,T){
+  const box=$('amb'+k);
+  if(!T||T.err||!T.cands||T.cands.length<2){box.hidden=true;box.innerHTML='';return}
+  box.hidden=false;
+  box.innerHTML=`Góc không xen giữa: có 2 tam giác thỏa mãn. Chọn hình để vẽ:`+
+    T.cands.map((c,i)=>`<label><input type="radio" name="amb${k}" value="${i}" ${i===T.solIdx?'checked':''}> Trường hợp ${i+1}: ${mi(T.unknownName)} ≈ ${fmt(c)} cm</label>`).join('');
+  box.querySelectorAll('input').forEach(r=>r.addEventListener('change',()=>{st.sol[k]=+r.value;draw()}));
+}
+function infoLine(T){
+  const given=new Set(T.sides.map(s=>[s.a,s.b].sort().join('')));
+  const parts=[[0,1],[1,2],[0,2]].map(([i,j])=>[T.nm[i],T.nm[j]]).filter(([a,b])=>!given.has([a,b].sort().join(''))).map(([a,b])=>`${mi(a+b)} ≈ ${fmt(T.L(a,b))} cm`);
+  T.nm.filter(x=>x!==T.V).forEach(x=>parts.push(`${hat(x)} ≈ ${fmt(T.angAt(x))}°`));
+  return 'Tính được: '+parts.join('; ');
+}
+function clearAll(){
+  st.W=null;['svgTop','svgWork'].forEach(id=>{$(id).innerHTML=''});
+  ['info1','info2','note'].forEach(id=>$(id).innerHTML='');
+  $('warn').hidden=true; $('lg1').textContent=''; $('lg2').textContent='';
+}
+function draw(){
+  if(st.busy) return;
+  $('err').innerHTML='';
+  const T1=readTri(1), T2=readTri(2);
+  renderAmb(1,T1); renderAmb(2,T2);
+  const errs=[T1,T2].filter(t=>t.err).map(t=>t.err);
+  $('result').innerHTML='<span class="hint">Nhấn “Kiểm tra” để xem kết luận và lời giải theo trường hợp c.g.c.</span>';
+  if(errs.length){$('err').innerHTML=errs.join('<br>');clearAll();return}
+  const shared=T2.nm.filter(x=>T1.nm.includes(x));
+  $('sharedOpt').hidden=shared.length!==1;
+  const pref=dataCorr(T1,T2), cong=congCorr(T1,T2,pref), corr=cong||pref;
+  const C=buildComposite(T1,T2,st.mode,corr);
+  if(C.err){$('err').innerHTML=C.err;clearAll();return}
+  Object.assign(st,{T1,T2,C,pref,cong:!!cong,corr,marks:computeMarks(T1,T2)});
+  st.W=buildWork(C,T1,T2,corr);
+  st.cur={a:{...st.W.states.init.a},b:{...st.W.states.init.b}}; st.stage='init';
+  $('warn').hidden=!C.warn; $('warn').innerHTML=C.warn;
+  $('lg1').textContent='Δ'+disp(T1.nm.join('')); $('lg2').textContent='Δ'+disp(T2.nm.join(''));
+  $('info1').innerHTML=infoLine(T1); $('info2').innerHTML=infoLine(T2);
+  renderTop(); renderWork(); updateTag();
+}
+
+/* ---------- kiểm tra & lời giải ---------- */
+function check(){
+  if(!st.W){draw();if(!st.W) return}
+  const {T1,T2,C,pref,cong}=st, inv=invert(pref);
+  const N1=disp(T1.nm.join('')), N2=disp(T2.nm.join(''));
+  const giv=T=>`${T.sides.map(s=>`${mi(s.a+s.b)} = ${fmt(s.v)} cm`).join('; ')}; ${hat(T.angName())} = ${fmt(T.gv)}°`;
+  const kind=T=>T.inc?'<span style="color:var(--ok)">Góc xen giữa hai cạnh ✓</span>':'<span style="color:var(--warn)">Góc không xen giữa hai cạnh</span>';
+  let h='';
+  const table=`<div class="tbl"><table><tr><th>Tam giác</th><th>Dữ kiện đã nhập</th><th>Vị trí góc</th></tr>
+    <tr><td class="m">Δ${N1}</td><td>${giv(T1)}</td><td>${kind(T1)}</td></tr>
+    <tr><td class="m">Δ${N2}</td><td>${giv(T2)}</td><td>${kind(T2)}</td></tr></table></div>`;
+  const sharedV=C.shared.length===1?C.shared[0]:null;
+  if(T1.inc&&T2.inc){
+    const s1=T1.sides.map(s=>s.v).sort((a,b)=>a-b), s2=T2.sides.map(s=>s.v).sort((a,b)=>a-b);
+    const okA=eq(T1.gv,T2.gv), okS=eq(s1[0],s2[0])&&eq(s1[1],s2[1]);
+    if(okA&&okS){
+      const map=s=>inv[s.a]+inv[s.b], key=x=>x.split(/(?=[A-Z])/).sort().join('');
+      const sideLine=s=>{const l1=s.a+s.b,l2=map(s);
+        return (key(l1)===key(l2)&&C.layout==='cạnh chung')?`${mi(l1)} là cạnh chung`:`${mi(l1)} = ${mi(l2)} (cùng bằng ${fmt(s.v)} cm)`};
+      const a1=T1.angName(), a2=a1.split(/(?=[A-Z])/).map(x=>inv[x]).join('');
+      let angLine=`${hat(a1)} = ${hat(a2)} (cùng bằng ${fmt(T1.gv)}°)`;
+      if(sharedV&&T1.V===sharedV&&T2.V===sharedV){
+        if(C.layout==='góc chung') angLine=`${hat(T1.V)} là góc chung`;
+        if(C.layout==='đối đỉnh') angLine=`${hat(a1)} = ${hat(a2)} (hai góc đối đỉnh)`;
+      }
+      const N2c=T1.nm.map(x=>inv[x]).join('');
+      h+=`<div class="badge ok">Hai tam giác bằng nhau (c.g.c)</div>${table}
+        <div>Xét ${mi('Δ'+T1.nm.join(''))} và ${mi('Δ'+N2c)} có:</div>
+        <div class="proof"><div>${sideLine(T1.sides[0])};</div><div>${angLine};</div><div>${sideLine(T1.sides[1])}.</div></div>
+        <div>Do đó <b class="m">Δ${N1} = Δ${disp(N2c)}</b> (c.g.c).</div>
+        <div class="hint" style="margin-top:6px">Đỉnh tương ứng: ${corrText()}.</div>`;
+      if(N2c!==T2.nm.join('')) h+=`<div class="warnbox">Lưu ý: viết <span class="m">Δ${N1} = Δ${disp(N2c)}</span> theo đúng thứ tự đỉnh tương ứng, không viết <span class="m">Δ${N1} = Δ${N2}</span>.</div>`;
+    }else{
+      const why=[];
+      if(!okA) why.push(`${hat(T1.angName())} = ${fmt(T1.gv)}° ≠ ${hat(T2.angName())} = ${fmt(T2.gv)}°`);
+      if(!okS) why.push(`Hai cạnh kề góc của ${mi('Δ'+T1.nm.join(''))} (${s1.map(fmt).join(' cm; ')} cm) không bằng hai cạnh kề góc của ${mi('Δ'+T2.nm.join(''))} (${s2.map(fmt).join(' cm; ')} cm)`);
+      h+=`<div class="badge ${cong?'warn':'bad'}">${cong?'Dữ kiện không tương ứng theo c.g.c':'Hai tam giác không bằng nhau'}</div>${table}
+        <div>Các cặp yếu tố đã nhập không bằng nhau tương ứng:</div><ul class="why">${why.map(w=>`<li>${w}</li>`).join('')}</ul>
+        <p>${cong?`Tuy nhiên, tính đầy đủ các cạnh cho thấy hai tam giác vẫn chồng khít (đỉnh tương ứng: ${corrText()}). Hãy nhập lại đúng cặp cạnh – góc xen giữa tương ứng.`:'⇒ Hai tam giác không chồng khít. Bấm “Xếp chồng” để quan sát.'}</p>`;
+    }
+  }else{
+    const bad=[T1,T2].filter(T=>!T.inc);
+    const amb=bad.filter(T=>T.cands&&T.cands.length>1);
+    h+=`<div class="badge warn">Chưa đủ điều kiện c.g.c</div>${table}<ul class="why">`+
+      bad.map(T=>`<li>Ở ${mi('Δ'+T.nm.join(''))}, ${hat(T.angName())} không xen giữa hai cạnh ${T.sides.map(s=>mi(s.a+s.b)).join(' và ')} ⇒ không dùng được trường hợp c.g.c.</li>`).join('')+
+      amb.map(T=>`<li>Với dữ kiện của ${mi('Δ'+T.nm.join(''))} có 2 tam giác khác nhau thỏa mãn (${mi(T.unknownName)} ≈ ${T.cands.map(fmt).join(' cm hoặc ')} cm).</li>`).join('')+
+      `</ul><p>Hình đang vẽ: hai tam giác <b>${cong?'chồng khít':'không chồng khít'}</b>. ${cong?'Nhưng chỉ là một trường hợp, chưa đủ để kết luận.':'Ví dụ này cho thấy có 2 cạnh và 1 góc bằng nhau nhưng góc không xen giữa thì hai tam giác có thể không bằng nhau.'}</p>`;
+  }
+  $('result').innerHTML=h;
+}
+
+/* ---------- ví dụ mẫu ---------- */
+const PRESETS=[
+  {t:[['ABC','AB',4,'AC',5,'A',60],['DEF','DE',4,'DF',5,'D',60]]},
+  {t:[['ABC','AB',4,'AC',6,'BAC',40],['ADC','AD',4,'AC',6,'DAC',40]]},
+  {t:[['OAB','OA',3,'OB',4,'AOB',65],['OCD','OC',3,'OD',4,'COD',65]],mode:'doi'},
+  {t:[['ABE','AB',5,'AE',3,'A',50],['ACD','AC',5,'AD',3,'A',50]],mode:'chung'},
+  {t:[['ABC','AB',4,'AC',5,'A',60],['MNP','MN',4,'MP',5,'M',80]]},
+  {t:[['ABC','AB',6,'BC',4,'A',35],['DEF','DE',6,'EF',4,'D',35]],sol:{1:0,2:1}}
+];
+function loadPreset(i){
+  const P=PRESETS[i];
+  P.t.forEach((r,j)=>{const k=j+1;[['n',0],['sa',1],['va',2],['sb',3],['vb',4],['ga',5],['gv',6]].forEach(([id,x])=>{$(id+k).value=String(r[x]).replace('.',',')})});
+  st.sol=P.sol?{...P.sol}:{1:0,2:0};
+  if(P.mode) setMode(P.mode,false);
+  draw();
+}
+function setMode(m,redraw=true){
+  st.mode=m;
+  document.querySelectorAll('#sharedOpt button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+  if(redraw) draw();
+}
+
+/* ---------- sự kiện ---------- */
+$('bDraw').addEventListener('click',()=>{st.sol={1:0,2:0};draw()});
+$('bSep').addEventListener('click',()=>go('sep'));
+$('bRot').addEventListener('click',()=>go('rot'));
+$('bStack').addEventListener('click',()=>go('stack'));
+$('bReset').addEventListener('click',()=>go('init'));
+$('bCheck').addEventListener('click',check);
+$('preset').addEventListener('change',e=>loadPreset(+e.target.value));
+document.querySelectorAll('#sharedOpt button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+document.querySelectorAll('.panel input').forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter'){st.sol={1:0,2:0};draw()}}));
+new ResizeObserver(()=>{if(st.W&&!st.busy){renderTop();renderWork()}}).observe($('svgTop'));
+loadPreset(0);
+</script>
+</body>
+</html>
